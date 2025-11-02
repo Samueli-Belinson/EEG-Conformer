@@ -237,20 +237,27 @@ class ExGAN():
 
         self.pretrain = False
 
-        self.log_write = open("/Code/CT/results/cf/2b/log_subject%d.txt" % self.nSub, "w")
+        self.log_write = open("./results/log_cf_2b_subject%d.txt" % self.nSub, "w")
 
         self.img_shape = (self.channels, self.img_height, self.img_width)
 
         self.Tensor = torch.cuda.FloatTensor
         self.LongTensor = torch.cuda.LongTensor
 
-        self.criterion_l1 = torch.nn.L1Loss().cuda()
-        self.criterion_l2 = torch.nn.MSELoss().cuda()
-        self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
+        if torch.cuda.is_available():
+            self.criterion_l1 = torch.nn.L1Loss().cuda()
+            self.criterion_l2 = torch.nn.MSELoss().cuda()
+            self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
 
-        self.model = ViT().cuda()
-        self.model = nn.DataParallel(self.model, device_ids=[i for i in range(len(gpus))])
-        self.model = self.model.cuda()
+            self.model = ViT().cuda()
+            self.model = nn.DataParallel(self.model, device_ids=[i for i in range(len(gpus))])
+            self.model = self.model.cuda()
+        else:
+            self.criterion_l1 = torch.nn.L1Loss()
+            self.criterion_l2 = torch.nn.MSELoss()
+            self.criterion_cls = torch.nn.CrossEntropyLoss()
+
+            self.model = ViT()
 
         self.centers = {}
 
@@ -472,7 +479,7 @@ class ExGAN():
 def main():
     best = 0
     aver = 0
-    result_write = open("/Code/CT/results/cf/2b/sub_result.txt", "w")
+    result_write = open("./results/cf_2b_sub_result.txt", "w")
 
     for i in range(9):
         starttime = datetime.datetime.now()
